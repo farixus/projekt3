@@ -1,5 +1,3 @@
-[TOC]
-
 # Project 3 - Infrastructure pentesting
 ## Security Raport
 ### Subject
@@ -73,14 +71,14 @@ CVSS is broken down into 8 different metrics. In this section, we’ll explore e
 ## Table of content
 
 [TOCM]
-## Security Raport
-## Executive summay
-## Risk classification
-## CVSS - Common Vulnerability Scoring System
-## Table of content
-## Change history
-## Process of gathering flags
-### Summary
+### Security Raport
+### Executive summay
+### Risk classification
+### CVSS - Common Vulnerability Scoring System
+### Table of content
+### Change history
+### Process of gathering flags
+#### Summary
 
 
 [TOC]
