@@ -67,22 +67,6 @@ CVSS is broken down into 8 different metrics. In this section, we’ll explore e
 ## Estimated threat using CVSS calculator
 ![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/CVSS.png)
 
-
-## Table of content
-
-[TOCM]
-### Security Raport
-### Executive summay
-### Risk classification
-### CVSS - Common Vulnerability Scoring System
-### Table of content
-### Change history
-### Process of gathering flags
-#### Summary
-
-
-[TOC]
-
 ## Change history
 
 2023-03-24 version 1.0 Final version of the report after carried tests out.
