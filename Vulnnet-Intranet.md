@@ -65,7 +65,7 @@ CVSS is broken down into 8 different metrics. In this section, we’ll explore e
 - Availability - This metric measures the impact to the availability of the impacted component resulting from a successfully exploited vulnerability. It refers to the loss of availability of the impacted component itself, such as a networked service (e.g., web, database, email). Since availability refers to the accessibility of information resources, attacks that consume network bandwidth, processor cycles, or disk space all impact the availability of an impacted component.
 
 ## Estimated threat using CVSS calculator
-![](../screenshots VulnNet Internal/CVSS.png)
+![](https://github.com/farixus/projekt3/blob/main/screenshots%20VulnNet%20Internal/CVSS.png)
 
 
 ## Table of content
@@ -73,4 +73,33 @@ CVSS is broken down into 8 different metrics. In this section, we’ll explore e
 [TOCM]
 
 [TOC]
+
+## Change history
+
+2023-03-24 version 1.0 Final version of the report after carried tests out.
+
+## Process of gathering flags
+
+### Summary
+The aim of this tasks is to find several flag across the system. The main issue
+
+As a result of exploration the system, we obtain following flags:
+1. What is the services flag? (services.txt) THM{0a09d51e488f5fa105d8d866a497440a}
+2. What is the internal flag? ("internal flag") THM{ff8e518addbbddb74531a724236a8221}
+3. What is the user flag? (user.txt) THM{da7c20696831f253e0afaca8b83c07ab}
+4. What is the root flag? (root.txt) THM{e8996faea46df09dba5676dd271c60bd}
+
+### Prerequisites for the attack
+An IP address
+
+### Technical details (Proof of concept)
+Here are the steps that we were able to retrieve interesting information above.
+
+1. Nmap scanning
+First we had to scan the machite to find interesting open ports and services. At the same time we try to discover names of applications, version and vulnerabilites connected with them as well as operating system and kernel version
+
+```
+sudo nmap -sSCV -T4 -A --script=default,vuln -oA nmap_scan 10.10.77.37
+```
+
 
