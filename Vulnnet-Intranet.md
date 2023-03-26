@@ -7,7 +7,7 @@ Penetration testing of machine: Vulnnet: Intranet - https://tryhackme.com/room/v
 ### Location
 Somewhere in Poland
 ### Auditors
-Rafał Deptuch
+Rafał Deptuch, Przemysław Stachurski, Krzysztof Konkol
 ### Version
 1.0
 

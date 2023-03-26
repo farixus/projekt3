@@ -1,22 +1,25 @@
 # Project 3 - Infrastructure pentesting
 ## Security Raport
 ### Subject
-Penetration testing of machine: BOREDHACKERBLOG: SOCIAL NETWORK https://www.vulnhub.com/entry/boredhackerblog-social-network,454/
+Penetration testing of machine: [BOREDHACKERBLOG: SOCIAL NETWORK](https://www.vulnhub.com/entry/boredhackerblog-social-network,454/)
 ### Date
 11-03-2023 - 12-03-2023
 ### Location
 Somewhere in Poland
 ### Auditors
-Rafał Deptuch, Przemysław Stachurski, Krzysztof 
+Rafał Deptuch, Przemysław Stachurski, Krzysztof Konkol
 ### Version
 1.0
 
 ## Executive summay
-This document is a summary of work proceeded by Group od SDA. The subject of the tests were to gather all flags using all posssible tools and knowledge.
-The machine is under address: https://tryhackme.com/room/vulnnetinternal
-The tests were carried out by using greybox - ip address was delivered.
+### Scope and assumptions
+This document is a summary of work proceeded by Group od SDA. The main subject of the tests were to obtain root privileges. The test focuses on security issues leading to compromise victim's machine.
+The machine exists as a virtual machine (Virtualbox -OVA), which can be downloaded form [this link](https://www.vulnhub.com/entry/boredhackerblog-social-network,454/)
+The tests were carried out by using blackbox - network access is to discover.
 
+### Most severe vulnerabilites idenifies
 
+(to be continued)
 
 ## Risk classification 
 Vulnerabilities are classified in a five-point scale reflecting both the probability of exploitation of the
