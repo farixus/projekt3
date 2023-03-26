@@ -19,7 +19,13 @@ The tests were carried out by using blackbox - network access is to discover.
 
 ### Most severe vulnerabilites idenifies
 
-(to be continued)
+[CVE-2021-4034](https://nvd.nist.gov/vuln/detail/CVE-2021-4034)
+NIST: NVD
+Base Score: 7.8 HIGH
+Vector:  CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H
+
+A local privilege escalation vulnerability was found on polkit's pkexec utility. The pkexec application is a setuid tool designed to allow unprivileged users to run commands as privileged users according predefined policies. The current version of pkexec doesn't handle the calling parameters count correctly and ends trying to execute environment variables as commands. An attacker can leverage this by crafting environment variables in such a way it'll induce pkexec to execute arbitrary code. When successfully executed the attack can cause a local privilege escalation given unprivileged users administrative rights on the target machine.
+
 
 ## Risk classification 
 Vulnerabilities are classified in a five-point scale reflecting both the probability of exploitation of the
@@ -60,24 +66,57 @@ CVSS is broken down into 8 different metrics. In this section, we’ll explore e
 - Integrity - This metric measures the impact to the integrity of a successfully exploited vulnerability. Integrity refers to the trustworthiness and veracity of information.
 - Availability - This metric measures the impact to the availability of the impacted component resulting from a successfully exploited vulnerability. It refers to the loss of availability of the impacted component itself, such as a networked service (e.g., web, database, email). Since availability refers to the accessibility of information resources, attacks that consume network bandwidth, processor cycles, or disk space all impact the availability of an impacted component.
 
-## Estimated threat using CVSS calculator
-
-
 ## Change history
 
-2023-03-25 version 1.0 Final version of the report after carried tests out.
+2023-03-26 version 1.0 Final version of the report after carried tests out.
 
-## Process of gathering flags
+## Process of exploiting machine
 
 ### Summary
-
+During the process some technics were used to get finnaly root privileges. Despite docker technology was used, root privileges has been gain as a result of misconfiguration, poorly password protection and use of documented vulnerability. Methods and technics were used:
+-port scanning
+-webapp attacks
+-code injection
+-pivoting
+-exploitation
+-password cracking
+-brute forcing
 
 ### Prerequisites for the attack
-
+Local internet access
 
 ### Technical details (Proof of concept)
+First of all we needed to discover ip address of victim. Therefor we used nmap.
+```
+nmap -sP 192.168.10.0/24 -oA network_scan
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-03-12 08:59 CET
+Nmap scan report for 192.168.10.x
+Host is up (0.0051s latency).
+Nmap scan report for 192.168.10.x
+Host is up (0.038s latency).
+Nmap scan report for 192.168.10.x
+Host is up (0.00050s latency).
+Nmap scan report for 192.168.10.x
+Host is up (0.00028s latency).
+Nmap scan report for 192.168.10.104
+Host is up (0.00026s latency).
+Nmap scan report for 192.168.10.108
+Host is up (0.00024s latency).
+Nmap done: 256 IP addresses (6 hosts up) scanned in 2.36 seconds
+```
+![](https://github.com/farixus/projekt3/blob/main/screenshots_Social_Network/01.host_discover.png)
 
+Victim's IP address: 192.168.10.108
 
+Detailed scan showed services on machine.
+```
+nmap -sSCV -T4 -A --script=default,vuln -oA nmap_scan 192.168.10.108
 
+22/tcp   open  ssh     OpenSSH 6.6p1 Ubuntu 2ubuntu1 (Ubuntu Linux; protocol 2.0)
+5000/tcp open  http    Werkzeug httpd 0.14.1 (Python 2.7.15)
+```
+We so, that http service is running on machine. Try to access via browser.
+Default page:
+![](https://github.com/farixus/projekt3/blob/main/screenshots_Social_Network/02.start_page_5000.png)
 
 ### Recommendation
